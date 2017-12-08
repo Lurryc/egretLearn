@@ -188,6 +188,7 @@ class Main extends egret.DisplayObjectContainer {
         // //根据name关键字，异步获取一个json配置文件，name属性请参考resources/resource.json配置文件的内容。
         // // Get asynchronously a json configuration file according to name keyword. As for the property of name please refer to the configuration file of resources/resource.json.
         // RES.getResAsync("description_json", this.startAnimation, this)
+    
         var shape:egret.Shape = new egret.Shape();
         shape.graphics.beginFill(0x00ff00);
         shape.graphics.drawRect(0,0,50,50)
@@ -223,8 +224,9 @@ class Main extends egret.DisplayObjectContainer {
                 this.graphics.beginFill(0xff);
                 this.graphics.drawCircle(25,75,25);
                 this.graphics.beginFill(0xf);
-                this.graphics.drawRoundRect(50,50,50,50,30,30)
-                this.graphics.endFill()
+                this.graphics.drawRoundRect(50,50,50,50,30,30);
+                this.graphics.endFill();
+                this.hitTestPoint(25,25,true);
             }
         }
         this.addChild(new MyGrid())
@@ -404,16 +406,221 @@ class Main extends egret.DisplayObjectContainer {
         //文本
         var textInput = new egret.TextField();
         textInput.type = egret.TextFieldType.INPUT;
-        textInput.inputType = egret.TextFieldInputType.TEL;
-        textInput.inputType = egret.TextFieldInputType.PASSWORD;
-        // textInput.inputType = egret.TextFieldInputType.TEXT;
-        textInput.displayAsPassword = true;
+            textInput.inputType = egret.TextFieldInputType.TEL;
+            textInput.inputType = egret.TextFieldInputType.PASSWORD;
+                textInput.displayAsPassword = true;
+            textInput.inputType = egret.TextFieldInputType.TEXT;
         textInput.text = 'your name:';
         textInput.width = 300;
         textInput.height = 50;
         textInput.y = 400;
         textInput.textColor = 0x000000;
         this.addChild(textInput);
+
+        //位图文本
+        //TODO:尚未完成
+        RES.getResByUrl("resource/assets/bg.jpg",bp,this)
+        function bp(font:egret.BitmapFont):void{
+            let _bpt = new egret.BitmapText;
+            _bpt.font = font;
+            _bpt.x = 300;
+            _bpt.y = 400;
+            this.addChild(_bpt);
+        }
+
+        //文本样式
+        var bg = new egret.Shape;
+        bg.graphics.beginFill(0x00ffff);
+        bg.graphics.drawRect(150,250,200,200);
+        bg.graphics.endFill();
+        this.addChild(bg);
+        var label1:egret.TextField = new egret.TextField()
+        this.addChild(label1);
+        label1.fontFamily = 'Impact';//字体样式
+        label1.x = 150;
+        label1.y = 250;
+        label1.text = "this is a text";//文本内容
+        label1.textColor = 0x000aaa;//文本颜色
+        label1.size=35;
+        label1.width = 200;
+        label1.height = 200;
+        label1.strokeColor = 0xffffff;//描边颜色
+        label1.stroke = 2;//描边粗细
+        label1.textAlign = egret.HorizontalAlign.CENTER;//水平居中
+        label1.verticalAlign = egret.VerticalAlign.MIDDLE;//垂直居中
+        label1.bold = true //加粗
+        label1.italic = true //斜体
+
+        //多样式文本
+        var texts = new egret.TextField;
+        texts.x = 300;
+        texts.y = 250;
+        texts.size = 20;
+        texts.fontFamily = 'SimHei';
+        texts.textAlign = egret.HorizontalAlign.CENTER;
+        texts.textFlow = [
+            {text:"first",style:{size:20,textColor:0xffffff}},
+            {text:"\n"},
+            {text:"second",style:{size:30,textColor:0xff00ff},},
+            {text:"\n"},
+            {text:"this is the last",style:{size:40,textColor:0x00ff00}}
+        ]
+        this.addChild(texts)
+
+        //文本点击事件
+        let tx = new egret.TextField;
+        tx.textFlow = [
+            {text:"这是一段有链接的文字\n",style:{size:30,textColor:0xff00ff,href:"http://www.egret.com"},},
+            {text:"this is the last",style:{size:40,textColor:0x00ff00,href:"event:text event triggered"}}
+        ]
+        tx.touchEnabled = true;
+        tx.addEventListener(egret.TextEvent.LINK,function(e){console.log(e)},this)
+        tx.x = 350;tx.y = 350;
+        tx.textAlign = egret.HorizontalAlign.CENTER;
+        this.addChild(tx);
+
+        //触摸事件
+            //TOUCH_BEGIN 当用户第一次触摸启用的设备时触发
+            //TOUCH_CANCEL 由于某个事件取消了触摸,此时触发
+            //TOUCH_END 当用户从设备上移除接触时触发
+            //TOUCH_MOVE 当用户在设备上移动时触发,且连续触发,直到接触点被删除
+            //TOUCH_TAP 相当于点击事件
+        let spr3 = new egret.Sprite();
+        spr3.graphics.beginFill(0x00ff00,.7);
+        spr3.graphics.drawRect(0,0,100,100);
+        spr3.y = 500;
+        spr3.graphics.endFill();
+        this.addChild(spr3);
+        spr3.touchEnabled = true;
+        spr3.addEventListener(egret.TouchEvent.TOUCH_TAP,onTouch,this);
+        spr3.addEventListener(egret.TouchEvent.TOUCH_TAP,onTouch2,this,false,1);
+        this.addEventListener(egret.TouchEvent.TOUCH_TAP,onTouch1,this);//TODO:只会监听所有可以被点击的显示对象
+        spr3.addEventListener(egret.TouchEvent.TOUCH_TAP,onTouch3,this);
+        function onTouch(){console.log("spr3监听onTouch")}
+        function onTouch1(e){console.log("冒泡");console.log(e.target)}
+        function onTouch2(){console.log("spr3监听onTouch2")}
+        function onTouch3(){console.log("spr3监听onTouch3")}
+        let showText = new egret.TextField();
+        showText.text = "事件显示"
+        showText.size = 30;
+        // showText.textAlign = egret.HorizontalAlign.CENTER;
+        // showText.verticalAlign = egret.VerticalAlign.MIDDLE;
+        showText.y = 0;
+        spr3.addChild(showText);
+
+        //http网络请求
+        let request = new egret.HttpRequest();
+        request.responseType = egret.HttpResponseType.TEXT;
+        request.open("http://httpbin.org/get",egret.HttpMethod.GET);
+        request.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
+        request.send();
+        request.addEventListener(egret.Event.COMPLETE,onGetMsg,this)
+        request.addEventListener(egret.ProgressEvent.PROGRESS,onGetPro,this)
+        function onGetMsg(e:egret.Event):void{
+            console.log("get data: ",e.target.response)
+        }
+        function onGetPro(e):void{
+            console.log("get process: "+Math.floor(100*e.bytesLoaded/e.bytesTotal)+"%")
+        }
+
+        //加载位图文件
+        let imgLoader = new egret.ImageLoader();
+        imgLoader.once(egret.Event.COMPLETE,imgHandler,this)
+        imgLoader.load("resource/assets/bg.jpg");
+        function imgHandler(e:egret.Event):void{
+            let bmp = new egret.Bitmap(e.target.data);
+            bmp.width = bmp.height = 100;
+            bmp.x = 300;
+            bmp.y = 150;
+            this.addChild(bmp)
+        }
+
+        //加载二进制
+        let reqBinary = new egret.HttpRequest();
+        let binaryUrl = "resource/assets/bg.jpg";
+        reqBinary.responseType = egret.HttpResponseType.ARRAY_BUFFER;
+        function resHandler(e){
+            console.log("位图的二进制长度: "+e.target.response.byteLength)
+        }
+        reqBinary.once(egret.Event.COMPLETE,resHandler,this);
+        reqBinary.open(binaryUrl,egret.HttpMethod.GET);
+        reqBinary.send();
+
+        //位图纹理加载
+        RES.addEventListener(RES.ResourceEvent.GROUP_COMPLETE,handlerGroup,this)
+        RES.loadConfig("resource/default.res.json","resource/");
+        RES.loadGroup("preload");
+        function handlerGroup(){
+            var img = new egret.Bitmap();
+            img.texture = RES.getRes("bg_jpg");
+            img.width *= 0.2;
+            img.height *= 0.2;
+            img.x = 500;
+            img.y = 450;
+            this.addChild(img);
+        }
+
+        //九宫格的使用
+        RES.addEventListener(RES.ResourceEvent.GROUP_COMPLETE,onGroupComp,this)
+        RES.loadConfig("resource/default.res.json","resource/");
+        RES.loadGroup("preload");
+        function onGroupComp(){
+            var img = new egret.Bitmap();
+            img.texture = RES.getRes("egret_icon_png");
+            this.addChild(img);
+            img.y = 600;
+            var img2 = new egret.Bitmap();
+            img2.texture = RES.getRes("egret_icon_png");
+            var rect = new egret.Rectangle(20,20,40,40)//左上角区域宽,左上角区域高,中间区域的宽,中间区域的高
+            img2.scale9Grid = rect;//设置九宫格
+            img2.width *= 2;
+            img2.y = 600;
+            img2.x = 250;
+            this.addChild(img2)
+        }
+        //纹理填充
+        RES.addEventListener(RES.ResourceEvent.GROUP_COMPLETE,onGroupComp2,this)
+        RES.loadConfig("resource/default.res.json","resource/");
+        RES.loadGroup("preload");
+        function onGroupComp2(){
+            var img = new egret.Bitmap();
+            img.texture = RES.getRes("egret_icon_png");
+            this.addChild(img);
+            img.y = 900;
+            img.fillMode = egret.BitmapFillMode.REPEAT
+            img.width *= 1.5;
+        }
+
+        //混合模式
+        RES.addEventListener(RES.ResourceEvent.GROUP_COMPLETE,handlerG,this);
+        RES.loadConfig("resource/default.res.json","resource/");
+        RES.loadGroup("preload");
+        function handlerG(){
+            var img3 = new egret.Bitmap();
+            img3.texture = RES.getRes("bg_jpg");
+            img3.width *= 0.1;
+            img3.height *= 0.1;
+            img3.x = 400;
+            img3.y = 700;
+            img3.blendMode = egret.BlendMode.ADD;
+            // img3.blendMode = egret.BlendMode.ERASE;
+            this.addChild(img3)
+        }
+
+        //计时器
+        var timer = new egret.Timer(1000,5);
+        timer.addEventListener(egret.TimerEvent.TIMER,timerFunc,this)
+        timer.addEventListener(egret.TimerEvent.TIMER_COMPLETE,timerCompFunc,this)
+        function timerFunc(){console.log('计时: '+egret.getTimer())}
+        function timerCompFunc(){console.log(egret.getTimer())}
+        timer.start();
+    
+
+        /*var sound = new egret.Sound();
+        sound.load("resource/media/Maid with-the-Flaxen-Hair.mp3");
+        sound.addEventListener(egret.Event.COMPLETE,function(){sound.play()},this)
+        sound.addEventListener(egret.IOErrorEvent.IO_ERROR,function(){console.log("loaded error!")},this)
+        */
     }
     /**
      * 根据name关键字创建一个Bitmap对象。name属性请参考resources/resource.json配置文件的内容。
