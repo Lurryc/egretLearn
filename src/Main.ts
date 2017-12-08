@@ -189,6 +189,7 @@ class Main extends egret.DisplayObjectContainer {
         // // Get asynchronously a json configuration file according to name keyword. As for the property of name please refer to the configuration file of resources/resource.json.
         // RES.getResAsync("description_json", this.startAnimation, this)
     
+        /*代码第一部分
         var shape:egret.Shape = new egret.Shape();
         shape.graphics.beginFill(0x00ff00);
         shape.graphics.drawRect(0,0,50,50)
@@ -446,8 +447,8 @@ class Main extends egret.DisplayObjectContainer {
         label1.height = 200;
         label1.strokeColor = 0xffffff;//描边颜色
         label1.stroke = 2;//描边粗细
-        label1.textAlign = egret.HorizontalAlign.CENTER;//水平居中
-        label1.verticalAlign = egret.VerticalAlign.MIDDLE;//垂直居中
+        label1.textAlign = egret.HorizontalAlign.CENTER;//水平居中(相对于文本自身所占空间,label1.width)
+        label1.verticalAlign = egret.VerticalAlign.MIDDLE;//垂直居中(相对于文本自身所占空间,label1.height)
         label1.bold = true //加粗
         label1.italic = true //斜体
 
@@ -594,10 +595,10 @@ class Main extends egret.DisplayObjectContainer {
         //混合模式
         RES.addEventListener(RES.ResourceEvent.GROUP_COMPLETE,handlerG,this);
         RES.loadConfig("resource/default.res.json","resource/");
-        RES.loadGroup("preload");
+        RES.loadGroup("preload");  //资源预加载
         function handlerG(){
             var img3 = new egret.Bitmap();
-            img3.texture = RES.getRes("bg_jpg");
+            img3.texture = RES.getRes("bg_jpg");  //同步加载
             img3.width *= 0.1;
             img3.height *= 0.1;
             img3.x = 400;
@@ -614,13 +615,113 @@ class Main extends egret.DisplayObjectContainer {
         function timerFunc(){console.log('计时: '+egret.getTimer())}
         function timerCompFunc(){console.log(egret.getTimer())}
         timer.start();
-    
-
-        /*var sound = new egret.Sound();
-        sound.load("resource/media/Maid with-the-Flaxen-Hair.mp3");
-        sound.addEventListener(egret.Event.COMPLETE,function(){sound.play()},this)
-        sound.addEventListener(egret.IOErrorEvent.IO_ERROR,function(){console.log("loaded error!")},this)
         */
+
+        //音频创建
+        var sound = new egret.Sound();
+        sound.load("resource/media/Maid with-the-Flaxen-Hair.mp3");
+        sound.addEventListener(egret.Event.COMPLETE,function(e:egret.Event){console.log(e.target)},this)
+        sound.addEventListener(egret.IOErrorEvent.IO_ERROR,function(){console.log("loaded error!")},this)
+        //操控音频的示例
+        var audio = new egret.Sound();
+        audio.load("resource/media/Maid with-the-Flaxen-Hair.mp3");
+        audio.addEventListener(egret.Event.COMPLETE,soundHandler,this);
+        audio.addEventListener(egret.IOErrorEvent.IO_ERROR,errHandler,this);
+        function soundHandler(e:egret.Event):void{
+            var btn = new egret.Sprite();
+            btn.graphics.beginFill(0x18f7ff);
+            btn.graphics.drawRoundRect(0,0,80,40,5);
+            btn.graphics.endFill();
+            btn.touchEnabled = true;
+            btn.anchorOffsetX = btn.width/2;
+            btn.anchorOffsetY = btn.height/2;
+            btn.x = this.stage.stageWidth/2;
+            btn.y = this.stage.stageHeight/2;
+            btn.addEventListener(egret.TouchEvent.TOUCH_TAP,handlerClick,this);
+            this.addChild(btn);
+            var soundChannel:egret.SoundChannel;
+            var position:number=0;
+            function handlerClick(e){
+                if(soundChannel){
+                    console.log(soundChannel);
+                    console.log(soundChannel.position)
+                    position = soundChannel.position;
+                    soundChannel.stop();
+                    soundChannel = null;
+                    return;
+                }
+                soundChannel = audio.play(position);
+                console.log(audio.length)
+            }
+        }
+        function errHandler():void{
+
+        }
+
+        //视频加载
+        var video = new egret.Video();
+        video.x = 0;
+        video.y = 0;
+        video.width = 300;
+        video.height = 200;
+        video.fullscreen = false;
+        video.poster = "resource/assets/bg.jpg";
+        video.load("resource/media/test.mp4");
+        this.addChild(video);
+        video.once(egret.Event.COMPLETE,onloadedVideo,this)
+        function onloadedVideo(e:egret.Event):void{
+            //绘制开始按钮
+            var videoBtn = new egret.Shape();
+            videoBtn.x = video.x+20;
+            videoBtn.y = video.y+20;
+            videoBtn.graphics.beginFill(0x000000);
+            videoBtn.graphics.drawCircle(25,25,25)
+            videoBtn.graphics.endFill();
+            this.addChild(videoBtn);
+            videoBtn.touchEnabled = true;
+            videoBtn.addEventListener(egret.TouchEvent.TOUCH_TAP,playVideo,this);
+            var isVideoPlay = false;
+            function playVideo():void{
+                if(isVideoPlay){
+                    console.log("当前视频播放位置: "+video.position)//todo:为什么点击后视频的播放位置会继续增加????
+                    video.pause();
+                    console.log("paused")
+                    isVideoPlay = false;
+                }else{
+                    console.log("当前视频播放位置: "+video.position)
+                    video.play()
+                    console.log("playing")
+                    isVideoPlay = true;
+                }
+            }
+            //绘制截图按钮
+            var shotBtn = new egret.Sprite();
+            shotBtn.graphics.beginFill(0x00ff00);
+            shotBtn.graphics.drawCircle(30,30,30);
+            shotBtn.x = video.x+video.width-80;
+            shotBtn.y = video.y+20;
+            this.addChild(shotBtn);
+            var shotText = new egret.TextField();
+            shotBtn.addChild(shotText);
+            shotText.text = "截图";
+            shotText.size = 25;
+            shotText.width = 60;
+            shotText.height = 60;
+            shotText.textColor = 0xffffff;
+            shotText.textAlign = egret.HorizontalAlign.CENTER;
+            shotText.verticalAlign = egret.VerticalAlign.MIDDLE;
+            shotText.touchEnabled = true;
+            shotBtn.addEventListener(egret.TouchEvent.TOUCH_TAP,printScreen,this);
+            function printScreen():void{
+                var shotMap = new egret.Bitmap();
+                shotMap.bitmapData = video.bitmapData;
+                shotMap.y = video.y+video.height+20;
+                shotMap.x = video.x;
+                console.log(video.bitmapData)
+                this.addChild(shotMap);
+            }
+        }
+        egret.log(video.paused) 
     }
     /**
      * 根据name关键字创建一个Bitmap对象。name属性请参考resources/resource.json配置文件的内容。
